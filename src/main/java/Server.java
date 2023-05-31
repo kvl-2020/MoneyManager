@@ -5,26 +5,16 @@ import com.google.gson.JsonParser;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Server {
 
-    private static final String CATEGORIES_FILE = "categories.tsv";
-
-    private static final String OTHER = "другое";
-
     static final int MY_PORT = 8989;
-
-    Categories categories = Categories.loadFromTxtFile(new File(CATEGORIES_FILE));
 
     public Server() {
 
-        Map<String, Integer> dataSumm = new HashMap<>();
-        Summator summator = new Summator(dataSumm);
-
-
+        List<Buy> buys = new ArrayList<>();
+        Summator summator = new Summator(buys);
 
         System.out.println("Стартуем сервер");
         try (ServerSocket serverSocket = new ServerSocket(MY_PORT);) { // стартуем сервер один(!) раз
@@ -39,9 +29,14 @@ public class Server {
                     System.out.println(inputStr);
                     JsonObject jsonObject = new JsonParser().parse(inputStr).getAsJsonObject();
 
-                    out.println(summator.add(
-                            getCategoriesByThing(jsonObject.get("title").getAsString()),
-                            jsonObject.get("sum").getAsInt()));
+                    String title = jsonObject.get("title").getAsString();
+                    int sum = jsonObject.get("sum").getAsInt();
+                    String date_ = jsonObject.get("date").getAsString();
+                    String[] date = date_.split("\\.");
+                    String dateY = date[0];
+                    String dateM = date[1];
+                    String dateD = date[2];
+                    out.println(summator.add(new Buy(title, dateY, dateM, dateD, sum)));
                     out.flush();
 
                 }
@@ -49,14 +44,6 @@ public class Server {
         } catch (IOException e) {
             System.out.println("Не могу стартовать сервер");
             e.printStackTrace();
-        }
-    }
-
-    private String getCategoriesByThing(String thing) {
-        if ( categories.getData().get(thing) != null ) {
-            return categories.getData().get(thing);
-        } else {
-            return OTHER;
         }
     }
 }
