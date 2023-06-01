@@ -11,10 +11,14 @@ public class Server {
 
     static final int MY_PORT = 8989;
 
+    static final String fileName = "data.bin";
+
     public Server() {
 
-        List<Buy> buys = new ArrayList<>();
-        Summator summator = new Summator(buys);
+        List<Buy> buyes = new ArrayList<>();
+        checkFile(fileName);
+        loadDataFromFile(buyes);
+        Summator summator = new Summator(buyes);
 
         System.out.println("Стартуем сервер");
         try (ServerSocket serverSocket = new ServerSocket(MY_PORT);) { // стартуем сервер один(!) раз
@@ -36,8 +40,10 @@ public class Server {
                     String dateY = date[0];
                     String dateM = date[1];
                     String dateD = date[2];
-                    out.println(summator.add(new Buy(title, dateY, dateM, dateD, sum)));
+                    Buy buy = new Buy(title, dateY, dateM, dateD, sum);
+                    out.println(summator.add(buy));
                     out.flush();
+                    addDataToFile(buy);
 
                 }
             }
@@ -45,5 +51,42 @@ public class Server {
             System.out.println("Не могу стартовать сервер");
             e.printStackTrace();
         }
+    }
+
+    private void checkFile(String fileName) {
+        File file = new File(fileName);
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void addDataToFile(Buy buy) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(fileName, true))) {
+            String text = buy.getTitle() + "\t" +
+                    buy.getDateY() + "." + buy.getDateM() + "." + buy.getDateD() + "." + "\t" +
+                    buy.getSum() + "\n";
+            bw.write(text);
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    private void loadDataFromFile(List<Buy> buys) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] strBuy = line.split("\t");
+                String[] date = strBuy[1].split("\\.");
+                Buy buy = new Buy(strBuy[0], date[0], date[1], date[1], Integer.parseInt(strBuy[2]));
+                buys.add(buy);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 }
