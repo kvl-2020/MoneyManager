@@ -9,18 +9,18 @@ public class Summator {
     private static final String OTHER = "другое";
     Categories categories = Categories.loadFromTxtFile(new File(CATEGORIES_FILE));
 
-    private final List<Buy> buys;
+    private final List<Buy> buyes;
 
     private String actualDateD;
     private String actualDateM;
     private String actualDateY;
 
-    public Summator(List<Buy> buys) {
-        this.buys = buys;
+    public Summator(List<Buy> buyes) {
+        this.buyes = buyes;
     }
 
     public String add(Buy buy) {
-        buys.add(buy);
+        buyes.add(buy);
         actualDateD = buy.getDateD();
         actualDateM = buy.getDateM();
         actualDateY = buy.getDateY();
@@ -32,7 +32,7 @@ public class Summator {
     }
 
     public String getMaxDayCategory() {
-        Sum result = findSumForMaxCategory(buys.stream().filter(buy ->
+        Sum result = findSumForMaxCategory(buyes.stream().filter(buy ->
                         buy.getDateD().equals(actualDateD) &&
                                 buy.getDateM().equals(actualDateM) &&
                                 buy.getDateY().equals(actualDateY)).collect(Collectors.toList()));
@@ -40,20 +40,20 @@ public class Summator {
     }
 
     public String getMaxMonthCategory() {
-        Sum result = findSumForMaxCategory(buys.stream().filter(buy ->
+        Sum result = findSumForMaxCategory(buyes.stream().filter(buy ->
                         buy.getDateM().equals(actualDateM) &&
                         buy.getDateY().equals(actualDateY)).collect(Collectors.toList()));
         return "\"maxMonthCategory\": {\"category\": \"" + result.getCategory() + "\", \"sum\": " + result.getSum() + "\"}";
     }
 
     public String getMaxYearCategory() {
-        Sum result = findSumForMaxCategory(buys.stream().filter(buy ->
+        Sum result = findSumForMaxCategory(buyes.stream().filter(buy ->
                         buy.getDateY().equals(actualDateY)).collect(Collectors.toList()));
         return "\"maxYearCategory\": {\"category\": \"" + result.getCategory() + "\", \"sum\": " + result.getSum() + "\"}";
     }
 
     public String getMaxCategory() {
-        Sum result = findSumForMaxCategory(buys);
+        Sum result = findSumForMaxCategory(buyes);
         return "\"maxCategory\": {\"category\": \"" + result.getCategory() + "\", \"sum\": " + result.getSum() + "\"}";
     }
 
